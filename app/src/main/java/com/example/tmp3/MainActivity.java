@@ -22,12 +22,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         ImageView catImage = this.findViewById(R.id.imageView2);
-        catImage.setScaleX(-1);
-
+        catImage.setScaleX(-1); // flip horizontally
 
         float startX = 0f;
         float endX = 800f;
-        
+
         ObjectAnimator walkForward = ObjectAnimator.ofFloat(catImage, "X", startX, endX);
         walkForward.setDuration(2000);
 
@@ -40,42 +39,31 @@ public class MainActivity extends AppCompatActivity {
         ObjectAnimator turnLeftToRight = ObjectAnimator.ofFloat(catImage, "ScaleX", 1, -1);
         turnLeftToRight.setDuration(100);
 
-
         AnimatorSet walkBothWaysAnimation = new AnimatorSet();
-        walkBothWaysAnimation.play(walkForward).before(turnRightToLeft);
-        walkBothWaysAnimation.play(turnRightToLeft).before(walkBackward);
-        walkBothWaysAnimation.play(walkBackward).before(turnLeftToRight);
-        walkBothWaysAnimation.play(turnLeftToRight);
+        walkBothWaysAnimation.playSequentially(
+                walkForward,
+                turnRightToLeft,
+                walkBackward,
+                turnLeftToRight
+        );
 
         walkBothWaysAnimation.addListener(new AnimatorListenerAdapter() {
 
-            private boolean mCanceled;
-
             @Override
             public void onAnimationStart(Animator animation) {
-                mCanceled = false;
             }
 
             @Override
             public void onAnimationCancel(Animator animation) {
-                mCanceled = true;
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
-                if (!mCanceled) {
-                    animation.start();
-                }
+                animation.start();
             }
-
         });
 
-
-
         walkBothWaysAnimation.start();
-
-
-
     }
 
 
