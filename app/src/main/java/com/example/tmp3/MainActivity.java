@@ -2,6 +2,11 @@ package com.example.tmp3;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.TimeAnimator;
 import android.animation.ValueAnimator;
 import android.os.Bundle;
 import android.view.View;
@@ -22,22 +27,54 @@ public class MainActivity extends AppCompatActivity {
 
         float startX = 0f;
         float endX = 800f;
-        ValueAnimator animation = ValueAnimator.ofFloat(startX, endX);
-        animation.setDuration(2*1000);
-        animation.start();
+        
+        ObjectAnimator walkForward = ObjectAnimator.ofFloat(catImage, "X", startX, endX);
+        walkForward.setDuration(2000);
+
+        ObjectAnimator turnRightToLeft = ObjectAnimator.ofFloat(catImage, "ScaleX", -1, 1);
+        turnRightToLeft.setDuration(100);
+
+        ObjectAnimator walkBackward = ObjectAnimator.ofFloat(catImage, "X", endX, startX);
+        walkBackward.setDuration(2000);
+
+        ObjectAnimator turnLeftToRight = ObjectAnimator.ofFloat(catImage, "ScaleX", 1, -1);
+        turnLeftToRight.setDuration(100);
 
 
+        AnimatorSet walkBothWaysAnimation = new AnimatorSet();
+        walkBothWaysAnimation.play(walkForward).before(turnRightToLeft);
+        walkBothWaysAnimation.play(turnRightToLeft).before(walkBackward);
+        walkBothWaysAnimation.play(walkBackward).before(turnLeftToRight);
+        walkBothWaysAnimation.play(turnLeftToRight);
 
-        animation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        walkBothWaysAnimation.addListener(new AnimatorListenerAdapter() {
+
+            private boolean mCanceled;
+
             @Override
-            public void onAnimationUpdate(ValueAnimator updatedAnimation) {
-                // You can use the animated value in a property that uses the
-                // same type as the animation. In this case, you can use the
-                // float value in the translationX property.
-                float animatedValue = (float)updatedAnimation.getAnimatedValue();
-                catImage.setX(animatedValue);
+            public void onAnimationStart(Animator animation) {
+                mCanceled = false;
             }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                mCanceled = true;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (!mCanceled) {
+                    animation.start();
+                }
+            }
+
         });
+
+
+
+        walkBothWaysAnimation.start();
+
+
 
     }
 
